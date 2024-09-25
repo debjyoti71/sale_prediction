@@ -83,28 +83,28 @@ def predict_category_sales(category_name, selected_month, n_months, exog_data=No
     return {"predictions": forecast_series.loc[selected_period].tolist()}
 
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def get_prediction():
     try:
-        # Extract request data
-        data = request.json
-        category = data.get('category')
-        month = data.get('month')
-        exog_data = data.get('exog_data')  # Optional exogenous data
+        if request.method == 'POST':
+            data = request.json
+            category = data.get('category')
+            month = data.get('month')
+            exog_data = data.get('exog_data')  # Optional exogenous data
+        elif request.method == 'GET':
+            category = request.args.get('category')
+            month = request.args.get('month')
+            exog_data = None  # Since exog_data can't be passed easily in a GET request
         
         if not category or not month:
             return jsonify({'error': 'Category and month are required.'}), 400
-        
+
         # Predict
         prediction_result = predict_category_sales(category, month, n_months=12, exog_data=exog_data)
-        
+
         if 'error' in prediction_result:
             return jsonify({'error': prediction_result['error']}), 400
-        
-        # Log the result for debugging
-        app.logger.info(f"Prediction Result: {prediction_result}")
-        
-        # Check if the result is a historical sales value or a prediction
+
         if 'sales_value' in prediction_result:
             return jsonify({'sales_value': prediction_result['sales_value']})  # Return historical data
         
