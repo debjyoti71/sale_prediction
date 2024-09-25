@@ -135,7 +135,12 @@ def get_categories():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return "Welcome to the Sales Prediction API!"
+
+
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
 @app.route('/test', methods=['GET'])
 def test():
